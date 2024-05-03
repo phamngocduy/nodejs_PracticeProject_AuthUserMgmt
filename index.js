@@ -2,6 +2,7 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const session = require('express-session')
 const routes = require('./router/friends.js')
+const MESSAGE = 'message'
 
 let users = []
 
@@ -33,13 +34,9 @@ app.use('/friends', (req, res, next) => {
                 req.user = user
                 next()
             }
-            else {
-                return res.status(403).json({message: 'User not authenticated'})
-            }
+            else return res.status(403).json({MESSAGE: 'User not authenticated'})
         })
-    } else {
-        return res.status(403).json({message: 'User not logged in'})
-    }
+    } else return res.status(403).json({MESSAGE: 'User not logged in'})
 })
 
 app.post('/login', (req, res) => {
@@ -47,7 +44,7 @@ app.post('/login', (req, res) => {
     const password = req.body.password
 
     if (!username || !password) {
-        return res.status(404).json({message: 'Error logging in'})
+        return res.status(404).json({MESSAGE: 'Error logging in'})
     }
 
     if (authenticatedUser(username, password)) {
@@ -55,14 +52,18 @@ app.post('/login', (req, res) => {
             data: password
         }, 'access', { expiresIn: 60 * 60 })
 
-    req.session.authorization = {
-        accessToken, username
-    }
-    return res.status(200).send("User successfully logged in");
+        req.session.authorization = {
+            accessToken, username
+        }
+        return res.status(200).send("User successfully logged in")
     } else {
-        return res.status(208).json({message: "Invalid Login. Check username and password"});
+        return res.status(208).json({MESSAGE: "Invalid Login. Check username and password"})
     }
-});
+})
+
+app.get('/login', (req, res) => {
+    res.redirect('/login.html')
+})
 
 app.post('/register', (req, res) => {
     const username = req.body.username
